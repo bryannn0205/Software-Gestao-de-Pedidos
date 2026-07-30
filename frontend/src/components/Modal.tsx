@@ -1,7 +1,5 @@
 import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
-import clsx from "clsx";
-
 interface ModalProps {
   open: boolean;
   onClose: () => void;
