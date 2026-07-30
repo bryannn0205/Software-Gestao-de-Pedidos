@@ -7,7 +7,7 @@ import { mensagemErro } from "../lib/api";
 import { Spinner } from "../components/ui";
 import { Modal } from "../components/Modal";
 import loginLeaves from "../assets/login-leaves.jpg";
-import logoCubo from "../assets/logo-cubo.jpg";
+import logoCubo from "../assets/logo-cubo.png";
 
 const DESTAQUES = [
   { icon: Clock, label: "Mais\nOrganização" },
@@ -76,10 +76,10 @@ export function LoginPage() {
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-12 flex items-center gap-3">
             <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg ring-1 ring-brand-400/30">
-              <img src={logoCubo} alt="EL-PACK" className="h-full w-full object-cover" />
+              <img src={logoCubo} alt="Extrusaick Polímeros" className="h-full w-full object-cover" />
             </div>
             <div>
-              <p className="text-sm font-bold tracking-wide text-text-primary">EL-PACK</p>
+              <p className="text-sm font-bold tracking-wide text-text-primary">Extrusaick Polímeros</p>
               <p className="text-xs text-text-secondary">Gestão de Pedidos</p>
             </div>
           </div>
