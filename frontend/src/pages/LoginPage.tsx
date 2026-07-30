@@ -1,11 +1,13 @@
 import { useState, type FormEvent, type InputHTMLAttributes, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { BarChart3, Clock, DollarSign, Eye, EyeOff, Lock, Mail, Package, ShieldCheck } from "lucide-react";
+import { BarChart3, Clock, DollarSign, Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useAuth } from "../lib/auth-context";
 import { mensagemErro } from "../lib/api";
 import { Spinner } from "../components/ui";
 import { Modal } from "../components/Modal";
+import loginLeaves from "../assets/login-leaves.jpg";
+import logoCubo from "../assets/logo-cubo.jpg";
 
 const DESTAQUES = [
   { icon: Clock, label: "Mais\nOrganização" },
@@ -73,8 +75,8 @@ export function LoginPage() {
       <div className="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-24">
         <div className="mx-auto w-full max-w-sm">
           <div className="mb-12 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-brand-400 to-brand-700 flex-shrink-0">
-              <Package size={22} className="text-white" />
+            <div className="h-11 w-11 flex-shrink-0 overflow-hidden rounded-lg ring-1 ring-brand-400/30">
+              <img src={logoCubo} alt="EL-PACK" className="h-full w-full object-cover" />
             </div>
             <div>
               <p className="text-sm font-bold tracking-wide text-text-primary">EL-PACK</p>
@@ -183,8 +185,16 @@ export function LoginPage() {
         <div
           className="absolute inset-0"
           style={{
+            backgroundImage: `url(${loginLeaves})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
             backgroundImage:
-              "radial-gradient(circle at 25% 20%, rgba(42,168,102,0.35), transparent 55%), radial-gradient(circle at 80% 75%, rgba(31,138,84,0.28), transparent 50%)",
+              "linear-gradient(180deg, rgba(11,12,14,0.55), rgba(11,12,14,0.88)), radial-gradient(circle at 25% 20%, rgba(42,168,102,0.35), transparent 55%), radial-gradient(circle at 80% 75%, rgba(31,138,84,0.28), transparent 50%)",
           }}
         />
 
