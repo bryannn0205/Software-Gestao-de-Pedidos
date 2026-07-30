@@ -20,13 +20,24 @@ function AuthField({
   trailing,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; icon: typeof Mail; trailing?: ReactNode }) {
+  const [isFocused, setIsFocused] = useState(false);
+
   return (
     <label className="block">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">{label}</span>
-      <div className="mt-2 flex items-center rounded-xl border border-border-subtle bg-surface-3 px-3 focus-within:border-brand-500">
-        <Icon size={16} className="text-text-tertiary" />
+      <span className="text-xs font-semibold uppercase tracking-wider text-text-secondary">{label}</span>
+      <div
+        className={clsx(
+          "mt-1.5 flex items-center rounded-lg border bg-surface-3 px-3 py-3 transition-all duration-150 ease-out",
+          isFocused
+            ? "border-brand-500 ring-2 ring-brand-400/30"
+            : "border-border-subtle hover:border-border-default"
+        )}
+      >
+        <Icon size={16} className={clsx("transition-colors duration-150", isFocused ? "text-brand-400" : "text-text-tertiary")} />
         <input
-          className="w-full bg-transparent px-3 py-3 text-sm text-text-primary placeholder:text-text-tertiary outline-none"
+          className="w-full bg-transparent px-3 py-0.5 text-sm text-text-primary placeholder:text-text-tertiary outline-none"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           {...props}
         />
         {trailing}
@@ -59,10 +70,10 @@ export function LoginPage() {
   return (
     <div className="grid min-h-screen bg-canvas lg:grid-cols-2">
       {/* Painel do formulário */}
-      <div className="flex flex-col justify-center px-8 py-16 sm:px-16 lg:px-20">
+      <div className="flex flex-col justify-center px-8 py-12 sm:px-12 lg:px-24">
         <div className="mx-auto w-full max-w-sm">
-          <div className="mb-10 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-400 to-brand-700">
+          <div className="mb-12 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-brand-400 to-brand-700 flex-shrink-0">
               <Package size={22} className="text-white" />
             </div>
             <div>
@@ -71,10 +82,12 @@ export function LoginPage() {
             </div>
           </div>
 
-          <h1 className="mb-1 text-[28px] font-semibold leading-tight text-text-primary">Entrar</h1>
-          <p className="mb-8 text-sm text-text-secondary">Acesse sua conta para continuar.</p>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold leading-tight text-text-primary">Entrar</h1>
+            <p className="mt-2 text-sm text-text-secondary">Acesse sua conta para continuar.</p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 flex flex-col">
             <AuthField
               label="E-mail"
               icon={Mail}
@@ -100,61 +113,73 @@ export function LoginPage() {
                   type="button"
                   onClick={() => setMostrarSenha((v) => !v)}
                   aria-label={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
-                  className="text-text-tertiary hover:text-text-secondary"
+                  className="transition-colors duration-150 text-text-tertiary hover:text-text-secondary"
                 >
                   {mostrarSenha ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               }
             />
 
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-text-secondary">
+            <div className="flex items-center justify-between text-sm pt-1">
+              <label className="flex items-center gap-2 cursor-pointer group text-text-secondary hover:text-text-primary transition-colors duration-150">
                 <input
                   type="checkbox"
                   checked={lembrarMe}
                   onChange={(e) => setLembrarMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-border-default bg-surface-3 accent-brand-500"
+                  className="h-4 w-4 rounded border border-border-default bg-surface-3 accent-brand-500 cursor-pointer transition-all duration-150 group-hover:border-brand-400"
                 />
                 Lembrar-me
               </label>
               <button
                 type="button"
                 onClick={() => setModalSenhaAberto(true)}
-                className="font-medium text-brand-400 hover:text-brand-300"
+                className="font-medium text-brand-400 hover:text-brand-300 transition-colors duration-150"
               >
                 Esqueceu sua senha?
               </button>
             </div>
 
             {erro && (
-              <p role="alert" className="text-sm text-danger">
+              <div
+                role="alert"
+                className="mt-4 rounded-lg bg-danger/10 border border-danger/20 px-3 py-2.5 text-sm text-danger"
+              >
                 {erro}
-              </p>
+              </div>
             )}
 
             <button
               type="submit"
               disabled={carregando}
               className={clsx(
-                "flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 py-3",
-                "text-sm font-semibold text-white transition-opacity hover:opacity-90",
+                "w-full flex items-center justify-center gap-2 rounded-2xl font-semibold text-white",
+                "bg-gradient-to-r from-brand-500 to-brand-600 py-3",
+                "transition-all duration-150 ease-out",
+                "hover:enabled:shadow-lg hover:enabled:shadow-brand-600/30",
+                "active:enabled:scale-[0.98]",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400",
                 "disabled:cursor-not-allowed disabled:opacity-60",
               )}
             >
-              {carregando && <Spinner />}
-              {carregando ? "Entrando..." : "Entrar"}
+              {carregando ? (
+                <>
+                  <Spinner className="text-white" />
+                  <span>Entrando...</span>
+                </>
+              ) : (
+                "Entrar"
+              )}
             </button>
           </form>
 
-          <p className="mt-10 text-center text-xs text-text-tertiary">
+          <p className="mt-12 text-center text-xs text-text-tertiary">
             © {new Date().getFullYear()} EL-PACK. Todos os direitos reservados.
           </p>
         </div>
       </div>
 
       {/* Painel de marca — ilustração e copy próprios */}
-      <div className="relative hidden overflow-hidden bg-surface lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-10">
+      <div className="relative hidden overflow-hidden bg-surface lg:flex lg:flex-col lg:items-center lg:justify-center lg:gap-12">
         <div
           className="absolute inset-0"
           style={{
@@ -168,17 +193,24 @@ export function LoginPage() {
         </div>
 
         <div className="relative z-10 max-w-sm px-10 text-center">
-          <p className="text-3xl font-semibold text-text-primary">EL-PACK</p>
+          <p className="text-3xl font-bold tracking-tight text-text-primary">EL-PACK</p>
           <p className="mt-3 text-sm leading-relaxed text-text-secondary">
             Controle de pedidos, produção e faturamento em um só lugar.
           </p>
         </div>
 
-        <div className="relative z-10 flex gap-8">
+        <div className="relative z-10 grid grid-cols-2 gap-6 px-4">
           {DESTAQUES.map(({ icon: Icon, label }) => (
-            <div key={label} className="flex flex-col items-center gap-2">
-              <Icon size={20} className="text-brand-400" />
-              <p className="whitespace-pre-line text-center text-xs text-text-secondary">{label}</p>
+            <div
+              key={label}
+              className="group flex flex-col items-center gap-3 p-4 rounded-xl transition-all duration-200 hover:bg-surface-2/50"
+            >
+              <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-brand-600/20 group-hover:bg-brand-600/30 transition-colors duration-200">
+                <Icon size={20} className="text-brand-300" />
+              </div>
+              <p className="whitespace-pre-line text-center text-xs font-medium text-text-secondary leading-snug">
+                {label}
+              </p>
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
+import clsx from "clsx";
 
 interface ModalProps {
   open: boolean;
@@ -40,12 +41,12 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-md p-1 text-text-tertiary hover:bg-surface-2 hover:text-text-primary"
+            className="rounded-md p-1 text-text-tertiary hover:bg-surface-2 hover:text-text-primary transition-colors duration-150"
           >
             <X size={18} />
           </button>
         </div>
-        <div className="text-sm text-text-secondary">{children}</div>
+        <div className="text-sm text-text-secondary leading-relaxed">{children}</div>
         {footer && <div className="mt-6 flex justify-end gap-2">{footer}</div>}
       </div>
     </div>
