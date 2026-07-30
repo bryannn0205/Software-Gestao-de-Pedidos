@@ -1,6 +1,8 @@
+import path from "node:path";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
+import fastifyStatic from "@fastify/static";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import { env } from "./shared/env.js";
@@ -35,6 +37,21 @@ export function buildApp() {
   app.register(dashboardRoutes, { prefix: "/api/dashboard" });
   app.register(usuariosRoutes, { prefix: "/api/usuarios" });
   app.register(auditoriaRoutes, { prefix: "/api/auditoria" });
+
+  // Usado pelo app desktop: com STATIC_DIR definido, o próprio backend também
+  // serve o build do frontend (uma porta só, sem CORS entre janelas do app).
+  // Em dev (npm run dev), STATIC_DIR não é definido e nada disso é registrado.
+  if (env.STATIC_DIR) {
+    const staticDir = path.resolve(env.STATIC_DIR);
+    app.register(fastifyStatic, { root: staticDir });
+
+    app.setNotFoundHandler((request, reply) => {
+      if (request.raw.url?.startsWith("/api")) {
+        return reply.status(404).send({ error: "NOT_FOUND", message: "Rota não encontrada." });
+      }
+      return reply.sendFile("index.html");
+    });
+  }
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof AppError) {

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <title>EL-PACK Servidor</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+        background: #0b0c0e;
+        color: #f5f6f7;
+        padding: 28px 32px;
+        text-align: center;
+      }
+      .badge {
+        width: 56px;
+        height: 56px;
+        margin: 0 auto 16px;
+        border-radius: 14px;
+        background: radial-gradient(circle at 30% 20%, rgba(42, 168, 102, 0.5), transparent 60%), #123f28;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 4px;
+      }
+      p.subtitulo {
+        color: #a7adb6;
+        font-size: 12px;
+        margin: 0 0 20px;
+      }
+      .card {
+        background: #14161a;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: left;
+        margin-bottom: 20px;
+      }
+      .card p {
+        margin: 0 0 8px;
+        font-size: 12px;
+        color: #a7adb6;
+      }
+      .card code {
+        display: block;
+        background: #242830;
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        color: #2aa866;
+        margin-bottom: 8px;
+        word-break: break-all;
+      }
+      button {
+        width: 100%;
+        padding: 11px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        margin-bottom: 10px;
+      }
+      #abrir {
+        background: linear-gradient(135deg, #2aa866, #1f8a54);
+        color: white;
+      }
+      #reconfigurar {
+        background: #1c1f24;
+        color: #a7adb6;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="badge">🟢</div>
+    <h1>Servidor rodando</h1>
+    <p class="subtitulo">Deixe esta janela aberta enquanto o sistema estiver em uso.</p>
+
+    <div class="card">
+      <p>Endereço para configurar nos computadores clientes:</p>
+      <div id="enderecos"></div>
+    </div>
+
+    <button id="abrir" type="button">Abrir o sistema neste computador</button>
+    <button id="reconfigurar" type="button">Reconfigurar banco de dados</button>
+
+    <script>
+      let portaAtual = null;
+
+      window.servidorApp.aoReceberStatus(({ port, ips }) => {
+        portaAtual = port;
+        const container = document.getElementById("enderecos");
+        const enderecos = ips.length ? ips : ["localhost"];
+        container.innerHTML = enderecos.map((ip) => `<code>${ip}:${port}</code>`).join("");
+      });
+
+      document.getElementById("abrir").addEventListener("click", () => {
+        window.servidorApp.abrirSistema(portaAtual);
+      });
+
+      document.getElementById("reconfigurar").addEventListener("click", () => {
+        window.servidorApp.reconfigurar();
+      });
+    </script>
+  </body>
+</html>

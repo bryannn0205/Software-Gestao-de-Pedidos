@@ -1,0 +1,31 @@
+{
+  "name": "elpack-cliente",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EL-PACK — Extrusaick Polímeros (Cliente)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.extrusaick.elpack.cliente",
+    "productName": "EL-PACK",
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "setup.html",
+      "erro-conexao.html"
+    ]
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

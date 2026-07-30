@@ -1,7 +1,10 @@
 import axios from "axios";
 
+// Sem VITE_API_URL definida (build de produção usada pelo app desktop), usa
+// caminho relativo — funciona porque nesse modo o próprio backend serve o
+// frontend, então API e página estão na mesma origem.
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "/api",
 });
 
 api.interceptors.request.use((config) => {

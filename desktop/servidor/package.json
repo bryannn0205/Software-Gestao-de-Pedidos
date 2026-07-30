@@ -1,0 +1,44 @@
+{
+  "name": "elpack-servidor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EL-PACK — Extrusaick Polímeros (Servidor)",
+  "main": "main.js",
+  "scripts": {
+    "prepare-resources": "node scripts/prepare-resources.mjs",
+    "prestart": "npm run prepare-resources",
+    "start": "electron .",
+    "predist": "npm run prepare-resources",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.extrusaick.elpack.servidor",
+    "productName": "EL-PACK Servidor",
+    "win": {
+      "target": "nsis"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "setup.html",
+      "status.html"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/backend",
+        "to": "backend"
+      },
+      {
+        "from": "resources/frontend",
+        "to": "frontend"
+      }
+    ]
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}
