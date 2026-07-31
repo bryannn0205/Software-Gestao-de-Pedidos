@@ -2,7 +2,7 @@
   "name": "elpack-servidor",
   "version": "1.0.0",
   "private": true,
-  "description": "EL-PACK — Extrusaick Polímeros (Servidor)",
+  "description": "Extrusaick Polímeros (Servidor)",
   "main": "main.js",
   "scripts": {
     "prepare-resources": "node scripts/prepare-resources.mjs",
@@ -17,7 +17,8 @@
   },
   "build": {
     "appId": "com.extrusaick.elpack.servidor",
-    "productName": "EL-PACK Servidor",
+    "productName": "Extrusaick - Servidor",
+    "icon": "build/icon.ico",
     "win": {
       "target": "nsis"
     },

@@ -17,11 +17,11 @@ function criarTray(port) {
   if (tray) return;
   const icone = nativeImage.createFromPath(caminhoRecurso("frontend", "favicon.png")).resize({ width: 16, height: 16 });
   tray = new Tray(icone.isEmpty() ? nativeImage.createEmpty() : icone);
-  tray.setToolTip("EL-PACK Servidor");
+  tray.setToolTip("Extrusaick - Servidor");
   tray.setContextMenu(
     Menu.buildFromTemplate([
       {
-        label: "Abrir EL-PACK Servidor",
+        label: "Abrir Extrusaick - Servidor",
         click: () => {
           if (janelaAtual) {
             janelaAtual.show();
