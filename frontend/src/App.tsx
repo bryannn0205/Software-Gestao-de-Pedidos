@@ -4,6 +4,8 @@ import { AuthProvider } from "./lib/auth-context";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Layout } from "./components/Layout";
 import { LoginPage } from "./pages/LoginPage";
+import { EsqueciSenhaPage } from "./pages/EsqueciSenhaPage";
+import { RedefinirSenhaPage } from "./pages/RedefinirSenhaPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ClientesListPage } from "./pages/clientes/ClientesListPage";
 import { ClienteFormPage } from "./pages/clientes/ClienteFormPage";
@@ -26,6 +28,8 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
+            <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
 
             <Route
               path="/"

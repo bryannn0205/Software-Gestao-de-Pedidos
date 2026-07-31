@@ -60,9 +60,23 @@ model Usuario {
   pedidos       Pedido[]
   statusHist    PedidoStatusHist[]
   auditLogs     AuditLog[]
+  resetSenhaTokens ResetSenhaToken[]
 
   @@index([perfilId])
   @@map("usuarios")
+}
+
+model ResetSenhaToken {
+  id        String    @id @default(uuid())
+  usuarioId String    @map("usuario_id")
+  usuario   Usuario   @relation(fields: [usuarioId], references: [id])
+  tokenHash String    @unique @map("token_hash")
+  expiraEm  DateTime  @map("expira_em")
+  usadoEm   DateTime? @map("usado_em")
+  criadoEm  DateTime  @default(now()) @map("criado_em")
+
+  @@index([usuarioId])
+  @@map("reset_senha_tokens")
 }
 
 model Cliente {

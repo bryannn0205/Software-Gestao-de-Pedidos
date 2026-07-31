@@ -5,7 +5,6 @@ import { BarChart3, Clock, DollarSign, Eye, EyeOff, Lock, Mail, ShieldCheck } fr
 import { useAuth } from "../lib/auth-context";
 import { mensagemErro } from "../lib/api";
 import { Spinner } from "../components/ui";
-import { Modal } from "../components/Modal";
 import loginLeaves from "../assets/login-leaves.jpg";
 import logoCubo from "../assets/logo-cubo.png";
 
@@ -16,7 +15,7 @@ const DESTAQUES = [
   { icon: ShieldCheck, label: "Mais\nControle" },
 ];
 
-function AuthField({
+export function AuthField({
   label,
   icon: Icon,
   trailing,
@@ -56,7 +55,6 @@ export function LoginPage() {
   const [lembrarMe, setLembrarMe] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const [modalSenhaAberto, setModalSenhaAberto] = useState(false);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -134,7 +132,7 @@ export function LoginPage() {
               </label>
               <button
                 type="button"
-                onClick={() => setModalSenhaAberto(true)}
+                onClick={() => navigate("/esqueci-senha")}
                 className="font-medium text-brand-400 hover:text-brand-300 transition-colors duration-150"
               >
                 Esqueceu sua senha?
@@ -225,13 +223,6 @@ export function LoginPage() {
           ))}
         </div>
       </div>
-
-      <Modal open={modalSenhaAberto} onClose={() => setModalSenhaAberto(false)} title="Esqueceu sua senha?">
-        <p>
-          Por enquanto, a redefinição de senha é feita pelo administrador do sistema. Contate quem administra o
-          EL-PACK na sua empresa para receber uma nova senha de acesso.
-        </p>
-      </Modal>
     </div>
   );
 }
