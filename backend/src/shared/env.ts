@@ -24,6 +24,10 @@ const envSchema = z.object({
   SMTP_FROM: z.string().optional(),
   // Validade do link de redefinição de senha, em minutos.
   RESET_SENHA_TOKEN_TTL_MIN: z.coerce.number().default(60),
+  // Client ID do Google Cloud Console (console.cloud.google.com > APIs e
+  // Serviços > Credenciais) — usado para validar o token do "Entrar com
+  // Google". Sem essa variável, a rota /auth/google fica desabilitada.
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 const parsed = envSchema.parse(process.env);

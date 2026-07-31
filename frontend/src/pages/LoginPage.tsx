@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type InputHTMLAttributes, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
+import { GoogleLogin, GoogleOAuthProvider, type CredentialResponse } from "@react-oauth/google";
 import { BarChart3, Clock, DollarSign, Eye, EyeOff, Lock, Mail, ShieldCheck } from "lucide-react";
 import { useAuth } from "../lib/auth-context";
 import { mensagemErro } from "../lib/api";
@@ -47,8 +48,10 @@ export function AuthField({
   );
 }
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
 export function LoginPage() {
-  const { login, carregando } = useAuth();
+  const { login, loginComGoogle, carregando, carregandoGoogle } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -61,6 +64,17 @@ export function LoginPage() {
     setErro(null);
     try {
       await login(email, senha, lembrarMe);
+      navigate("/dashboard");
+    } catch (error) {
+      setErro(mensagemErro(error));
+    }
+  }
+
+  async function handleGoogleSuccess(credentialResponse: CredentialResponse) {
+    setErro(null);
+    if (!credentialResponse.credential) return;
+    try {
+      await loginComGoogle(credentialResponse.credential);
       navigate("/dashboard");
     } catch (error) {
       setErro(mensagemErro(error));
@@ -86,6 +100,28 @@ export function LoginPage() {
             <h1 className="text-3xl font-bold leading-tight text-text-primary">Entrar</h1>
             <p className="mt-2 text-sm text-text-secondary">Acesse sua conta para continuar.</p>
           </div>
+
+          {GOOGLE_CLIENT_ID && (
+            <div className="mb-6">
+              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                <div className={clsx("flex justify-center [&>div]:w-full", carregando && "pointer-events-none opacity-60")}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setErro("Erro ao fazer login com Google.")}
+                    text="signin_with"
+                    locale="pt-BR"
+                    width="320"
+                  />
+                </div>
+              </GoogleOAuthProvider>
+
+              <div className="my-6 flex items-center gap-3">
+                <hr className="flex-1 border-border-subtle" />
+                <span className="text-xs text-text-tertiary">ou</span>
+                <hr className="flex-1 border-border-subtle" />
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4 flex flex-col">
             <AuthField
@@ -150,7 +186,7 @@ export function LoginPage() {
 
             <button
               type="submit"
-              disabled={carregando}
+              disabled={carregando || carregandoGoogle}
               className={clsx(
                 "w-full flex items-center justify-center gap-2 rounded-2xl font-semibold text-white",
                 "bg-gradient-to-r from-brand-500 to-brand-600 py-3",
@@ -173,7 +209,7 @@ export function LoginPage() {
           </form>
 
           <p className="mt-12 text-center text-xs text-text-tertiary">
-            © {new Date().getFullYear()} EL-PACK. Todos os direitos reservados.
+            © {new Date().getFullYear()} Extrusaick Polímeros. Todos os direitos reservados.
           </p>
         </div>
       </div>
@@ -201,7 +237,7 @@ export function LoginPage() {
         </div>
 
         <div className="relative z-10 max-w-sm px-10 text-center">
-          <p className="text-3xl font-bold tracking-tight text-text-primary">EL-PACK</p>
+          <p className="text-3xl font-bold tracking-tight text-text-primary">Extrusaick Polímeros</p>
           <p className="mt-3 text-sm leading-relaxed text-text-secondary">
             Controle de pedidos, produção e faturamento em um só lugar.
           </p>

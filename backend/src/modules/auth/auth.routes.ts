@@ -2,11 +2,14 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import argon2 from "argon2";
 import crypto from "node:crypto";
+import { OAuth2Client } from "google-auth-library";
 import { prisma } from "../../shared/prisma.js";
 import { AppError, TooManyRequestsError, UnauthorizedError } from "../../shared/errors.js";
 import { authenticate, type JwtPayload } from "../../shared/auth.js";
 import { enviarEmail } from "../../shared/email.js";
 import { env } from "../../shared/env.js";
+
+const googleClient = env.GOOGLE_CLIENT_ID ? new OAuth2Client(env.GOOGLE_CLIENT_ID) : null;
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -23,12 +26,46 @@ const redefinirSenhaSchema = z.object({
   novaSenha: z.string().min(8, "A senha deve ter ao menos 8 caracteres."),
 });
 
+const googleSchema = z.object({
+  credential: z.string().min(1),
+});
+
 const MAX_TENTATIVAS = 5;
 const DURACAO_BLOQUEIO_MIN = 15;
 const REENVIO_MIN_INTERVALO_MIN = 2;
 
 function hashToken(token: string) {
   return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+type UsuarioComPerfil = {
+  id: string;
+  nome: string;
+  email: string;
+  perfilId: string;
+  perfil: { nome: string; permissoes: unknown };
+};
+
+function montarRespostaLogin(app: FastifyInstance, usuario: UsuarioComPerfil, dias: "8h" | "30d") {
+  const payload: JwtPayload = {
+    sub: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    perfilId: usuario.perfilId,
+    perfilNome: usuario.perfil.nome,
+    permissoes: usuario.perfil.permissoes as Record<string, ("read" | "write")[]>,
+  };
+
+  return {
+    token: app.jwt.sign(payload, { expiresIn: dias }),
+    usuario: {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+      perfil: usuario.perfil.nome,
+      permissoes: usuario.perfil.permissoes,
+    },
+  };
 }
 
 export async function authRoutes(app: FastifyInstance) {
@@ -72,27 +109,40 @@ export async function authRoutes(app: FastifyInstance) {
       });
     }
 
-    const payload: JwtPayload = {
-      sub: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email,
-      perfilId: usuario.perfilId,
-      perfilNome: usuario.perfil.nome,
-      permissoes: usuario.perfil.permissoes as Record<string, ("read" | "write")[]>,
-    };
+    return reply.send(montarRespostaLogin(app, usuario, lembrarMe ? "30d" : "8h"));
+  });
 
-    const token = app.jwt.sign(payload, { expiresIn: lembrarMe ? "30d" : "8h" });
+  app.post("/google", async (request, reply) => {
+    if (!googleClient) {
+      throw new AppError("Login com Google não está configurado neste servidor.", 501, "GOOGLE_NAO_CONFIGURADO");
+    }
 
-    return reply.send({
-      token,
-      usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-        perfil: usuario.perfil.nome,
-        permissoes: usuario.perfil.permissoes,
-      },
+    const { credential } = googleSchema.parse(request.body);
+
+    let payloadGoogle;
+    try {
+      const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: env.GOOGLE_CLIENT_ID });
+      payloadGoogle = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedError("Não foi possível verificar sua conta Google.");
+    }
+
+    if (!payloadGoogle?.email || !payloadGoogle.email_verified) {
+      throw new UnauthorizedError("Sua conta Google precisa ter um e-mail verificado.");
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { email: payloadGoogle.email },
+      include: { perfil: true },
     });
+
+    if (!usuario || !usuario.ativo) {
+      throw new UnauthorizedError(
+        "Esse e-mail não está cadastrado no sistema. Peça para um administrador criar seu acesso primeiro.",
+      );
+    }
+
+    return reply.send(montarRespostaLogin(app, usuario, "30d"));
   });
 
   app.get("/me", { preHandler: authenticate }, async (request, reply) => {
@@ -119,15 +169,10 @@ export async function authRoutes(app: FastifyInstance) {
     }
 
     const token = crypto.randomBytes(32).toString("hex");
-    await prisma.resetSenhaToken.create({
-      data: {
-        usuarioId: usuario.id,
-        tokenHash: hashToken(token),
-        expiraEm: new Date(Date.now() + env.RESET_SENHA_TOKEN_TTL_MIN * 60_000),
-      },
-    });
-
     const link = `${env.FRONTEND_URL}/redefinir-senha?token=${token}`;
+
+    // Envia antes de gravar no banco: se o e-mail falhar, não queremos um
+    // token "gasto" ocupando a janela de reenvio sem o usuário ter recebido nada.
     await enviarEmail({
       to: usuario.email,
       subject: "Redefinição de senha — Extrusaick Polímeros",
@@ -137,6 +182,14 @@ export async function authRoutes(app: FastifyInstance) {
         <p><a href="${link}">${link}</a></p>
         <p>Se você não solicitou isso, ignore este e-mail — sua senha continua a mesma.</p>
       `,
+    });
+
+    await prisma.resetSenhaToken.create({
+      data: {
+        usuarioId: usuario.id,
+        tokenHash: hashToken(token),
+        expiraEm: new Date(Date.now() + env.RESET_SENHA_TOKEN_TTL_MIN * 60_000),
+      },
     });
 
     return reply.send({ message: mensagem });
