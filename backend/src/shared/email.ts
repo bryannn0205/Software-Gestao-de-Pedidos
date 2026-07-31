@@ -6,6 +6,11 @@ const transporter = nodemailer.createTransport({
   port: env.SMTP_PORT,
   secure: env.SMTP_PORT === 465,
   auth: env.SMTP_USER ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
+  // Sem isso, uma falha de rede/SMTP deixa a requisição pendurada por minutos
+  // (default do nodemailer) — o usuário via só o botão girando pra sempre.
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
 });
 
 export async function enviarEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
